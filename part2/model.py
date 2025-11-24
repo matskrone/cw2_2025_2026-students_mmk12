@@ -122,24 +122,44 @@ class CausalSelfAttention(nn.Module):
         """
         B, T, C = x.size()
         ### Your code here (~8-15 lines) ###
-        raise NotImplementedError("Implement the forward method in CausalSelfAttention in model.py")
+        hs = C // self.n_head  # head size is embedding dimension divided by number of heads
+
         # Step 1: Calculate query, key, values for all heads
-        # (B, nh, T, hs)
-      
+        # We go from (B, T, C) to (B, T, no_heads, hs) to (B, no_heads, T, hs) using first view, and them transpose
+
+        k = self.key(x).view(B, T, self.n_head, hs).transpose(1, 2)  # (B, nh, T, hs)
+        q = self.query(x).view(B, T, self.n_head, hs).transpose(1, 2)
+        v = self.value(x).view(B, T, self.n_head, hs).transpose(1, 2)
+
         # Step 2: Compute attention scores
         # Self-attend: (B, nh, T, hs) x (B, nh, hs, T) -> (B, nh, T, T)
+        #print("Dim check: " + str(k.transpose(-2, -1))) #This converts to (B, nh, hs, T)
+        att = (q @ k.transpose(-2, -1)) / (hs ** 0.5)  # (B, nh, T, T)
 
         # Step 3: Masking out the future tokens (causal) and softmax
 
+        # First, the mask, up to the sequence length for the two last dims
+        att = att.masked_fill(self.mask[:, :, :T, :T] == 0, float("-inf"))
+        
+        #Apply softmax
+        att = F.softmax(att, dim=-1)
+        
+        #Use the attention dropout layer
+        att = self.attn_drop(att)
+
         # Step 4: Compute the attention output
         # (B, nh, T, T) x (B, nh, T, hs) -> (B, nh, T, hs)
+        y = att @ v  # (B, nh, T, hs)
 
         # Step 5: re-assemble all head outputs side by side
         # (B, T, nh, hs) -> (B, T, C)
+        # We need to use the contigous torch function, since we do transpose before the view
+        y = y.transpose(1, 2).contiguous().view(B, T, C)
 
         # Step 6: output projection + dropout
-        ### End of your code ###
-        return GPTAttentionOutput(output=y, attentions=attention)
+        y = self.resid_drop(self.proj(y))
+        
+        return GPTAttentionOutput(output=y, attentions=att)
 
 
 class Block(nn.Module):
