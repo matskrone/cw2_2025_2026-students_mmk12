@@ -252,39 +252,42 @@ class NMT(nn.Module):
                     your implementation.
         """
 
-        
-        # 1. Apply decoder to Ybar_t and dec_state
+               # 1. Apply decoder to Ybar_t and dec_state
         dec_hidden, dec_cell = self.decoder(Ybar_t, dec_state)
         dec_state = (dec_hidden, dec_cell)
 
-        ### Your code here (~8-15 lines) ###
-        raise NotImplementedError("Implement the step function in nmt_model.py")
-
-        # Dot-product attention
         # 2. Compute attention scores e_t
-        # Need to compute batched matrix multiplication between dec_hidden and enc_hiddens_proj
-        # dec_hidden has a shape of (b, h), enc_hiddens_proj is (b, src_len, h)
-        # We want to end up with a shape of (b, src_len)
+        # dec_hidden: (b, h) → (b, 1, h)
+        dec_hidden_exp = dec_hidden.unsqueeze(1)
+        # enc_hiddens_proj: (b, src_len, h) → (b, h, src_len)
+        enc_proj_t = enc_hiddens_proj.transpose(1, 2)
+        # Dot-product attention: (b,1,h) @ (b,h,src_len) → (b,src_len)
+        e_t = torch.bmm(dec_hidden_exp, enc_proj_t).squeeze(1)
 
-        # If enc_masks is None, this step should be skipped
-        # Use bool() to convert ByteTensor to BoolTensor
-        # Use float("-inf") to represent -inf
-        # Use masked_fill_ to fill in -inf at the masked positions
+        # 3. Apply mask to attention scores
+        if enc_masks is not None:
+            e_t = e_t.masked_fill(enc_masks.bool(), float("-inf"))
 
-        # 3. Apply softmax to e_t to yield alpha_t of shape (b, src_len)
+        # 4. Apply softmax to obtain attention distribution
+        alpha_t = F.softmax(e_t, dim=1)
 
-        # 4. Use batched matrix multiplication between alpha_t and enc_hiddens
-        # alpha_t has a shape of (b, src_len), enc_hiddens is (b, src_len, 2h)
-        # We want to end up with a shape of (b, 2h)
+        # 5. Compute context vector
+        # alpha_t: (b, src_len) → (b,1,src_len)
+        alpha_exp = alpha_t.unsqueeze(1)
+        # (b,1,src_len) @ (b,src_len,2h) → (b,1,2h) → squeeze → (b,2h)
+        attention_t = torch.bmm(alpha_exp, enc_hiddens).squeeze(1)
 
-        # 5. Concatenate dec_hidden with attention_t to compute tensor u_t
+        # 6. Concatenate dec_hidden with attention_t
+        # dec_hidden: (b,h), attention_t: (b,2h)
+        u_t = torch.cat([dec_hidden, attention_t], dim=1)
 
-        # 6. Apply combined output projection layer to u_t to compute tensor v_t
+        # 7. Apply combined output projection, tanh, and dropout
+        v_t = self.combined_output_projection(u_t)    # (b, h)
+        o_t = self.dropout(torch.tanh(v_t))           # (b, h)
 
-        # 7. Compute tensor O_t by applying Tanh and then dropout to v_t
-
-        ### End of your code ###
         return dec_state, o_t, alpha_t
+ 
+        
 
     def generate_sent_masks(
         self, enc_hiddens: torch.Tensor, source_lengths: list[int]

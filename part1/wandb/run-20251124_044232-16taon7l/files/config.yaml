@@ -1,0 +1,77 @@
+_wandb:
+    value:
+        cli_version: 0.21.4
+        e:
+            ulvs0koub8aeod1apba97x6rlou3bva4:
+                args:
+                    - --model-config
+                    - model_config.yaml
+                    - --train-config
+                    - train_config.yaml
+                codePath: part1\train.py
+                codePathLocal: train.py
+                cpu_count: 10
+                cpu_count_logical: 12
+                disk:
+                    /:
+                        total: "510938574848"
+                        used: "148711723008"
+                email: jr4022@hw.ac.uk
+                executable: C:\Users\Ben\OneDrive\Desktop\Heriot-Watt Lecture Slides\cw2_2025_2026-students_mmk12\.venv\Scripts\python.exe
+                git:
+                    commit: f77bdd8e8573e63a2f10ca24180ef7a9d6b21737
+                    remote: https://github.com/matskrone/cw2_2025_2026-students_mmk12.git
+                host: LAPTOP-9OOMR7CP
+                memory:
+                    total: "16876888064"
+                os: Windows-11-10.0.26100-SP0
+                program: C:\Users\Ben\OneDrive\Desktop\Heriot-Watt Lecture Slides\cw2_2025_2026-students_mmk12\part1\train.py
+                python: CPython 3.12.6
+                root: C:\Users\Ben\OneDrive\Desktop\Heriot-Watt Lecture Slides\cw2_2025_2026-students_mmk12\part1
+                startedAt: "2025-11-24T04:42:32.846923Z"
+                writerId: ulvs0koub8aeod1apba97x6rlou3bva4
+        m: []
+        python_version: 3.12.6
+        t:
+            "1":
+                - 1
+            "2":
+                - 1
+            "3":
+                - 13
+                - 16
+                - 61
+            "4": 3.12.6
+            "5": 0.21.4
+            "8":
+                - 3
+            "12": 0.21.4
+            "13": windows-amd64
+dev_batch_size:
+    value: 128
+dropout_rate:
+    value: 0.2
+embed_size:
+    value: 128
+hidden_size:
+    value: 128
+log_every:
+    value: 10
+lr:
+    value: 0.001
+lr_decay:
+    value: 0.5
+max_epoch:
+    value: 30
+max_num_trial:
+    value: 5
+patience:
+    value: 1
+seed:
+    value: 0
+train_batch_size:
+    value: 32
+uniform_init:
+    value: 0.1
+valid_niter:
+    value: 2000
