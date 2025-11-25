@@ -55,7 +55,7 @@ def read_corpus(file_path: str, source: str, vocab_size: int = 2500) -> list[lis
                 subword_tokens = ["<s>"] + subword_tokens + ["</s>"]
             data.append(subword_tokens)
 
-    data = data[:1]
+    data = data
     return data
 
 

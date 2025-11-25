@@ -1,0 +1,4 @@
+# Medium NMT model (recommended baseline)
+embed_size: 256
+hidden_size: 512
+dropout_rate: 0.2

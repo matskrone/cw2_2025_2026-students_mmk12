@@ -1,0 +1,4 @@
+# Small NMT model
+embed_size: 128
+hidden_size: 256
+dropout_rate: 0.2

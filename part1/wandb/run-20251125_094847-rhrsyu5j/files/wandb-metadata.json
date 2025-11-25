@@ -1,0 +1,34 @@
+{
+  "os": "Windows-11-10.0.26100-SP0",
+  "python": "CPython 3.12.6",
+  "startedAt": "2025-11-25T09:48:47.602150Z",
+  "args": [
+    "--model-config",
+    "model_small.yaml",
+    "--train-config",
+    "train_config.yaml"
+  ],
+  "program": "C:\\Users\\Ben\\OneDrive\\Desktop\\Heriot-Watt Lecture Slides\\cw2_2025_2026-students_mmk12\\part1\\train.py",
+  "codePath": "part1\\train.py",
+  "codePathLocal": "train.py",
+  "git": {
+    "remote": "https://github.com/matskrone/cw2_2025_2026-students_mmk12.git",
+    "commit": "709b8348cc4d986e87b146ffd381cff57a9207a9"
+  },
+  "email": "jr4022@hw.ac.uk",
+  "root": "C:\\Users\\Ben\\OneDrive\\Desktop\\Heriot-Watt Lecture Slides\\cw2_2025_2026-students_mmk12\\part1",
+  "host": "LAPTOP-9OOMR7CP",
+  "executable": "C:\\Users\\Ben\\OneDrive\\Desktop\\Heriot-Watt Lecture Slides\\cw2_2025_2026-students_mmk12\\.venv\\Scripts\\python.exe",
+  "cpu_count": 10,
+  "cpu_count_logical": 12,
+  "disk": {
+    "/": {
+      "total": "510938574848",
+      "used": "150376632320"
+    }
+  },
+  "memory": {
+    "total": "16876888064"
+  },
+  "writerId": "stppvqj1jbbu6at51a5k5wr77c1crs4j"
+}
