@@ -108,6 +108,8 @@ class CausalSelfAttention(nn.Module):
         self, x: torch.Tensor, output_attentions: bool = False
     ) -> GPTAttentionOutput:
         """Forward the masked self-attention layer.
+
+         (Reference code: https://gist.github.com/wolfecameron/26863dbbc322b15d2e224a2569868256)
         
         Args:
             x (torch.Tensor): Input tensor of shape (B, T, C) where B is the batch size,
