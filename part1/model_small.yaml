@@ -1,4 +1,6 @@
-# Small NMT model
-embed_size: 128
-hidden_size: 256
+# The size of the embedding vectors
+embed_size: 16
+# The size of the encoder's LSTM hidden states
+hidden_size: 16
+# The dropout rate
 dropout_rate: 0.2
