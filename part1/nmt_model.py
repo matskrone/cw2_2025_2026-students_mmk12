@@ -250,31 +250,33 @@ class NMT(nn.Module):
             alpha_t (Tensor): Tensor of shape (b, src_len), correspoding to the attention scores distribution (after softmax).
             Note: You will not use this outside of this function. We are simply returning this value so that we can sanity check
                     your implementation.
+       
+        (Reference: https://github.com/OpenNMT/OpenNMT-py/blob/master/onmt/modules/global_attention.py) 
         """
-
+        
                # 1. Apply decoder to Ybar_t and dec_state
         dec_hidden, dec_cell = self.decoder(Ybar_t, dec_state)
         dec_state = (dec_hidden, dec_cell)
 
         # 2. Compute attention scores e_t
-        # dec_hidden: (b, h) → (b, 1, h)
+        # dec_hidden: (b, h) -> (b, 1, h)
         dec_hidden_exp = dec_hidden.unsqueeze(1)
-        # enc_hiddens_proj: (b, src_len, h) → (b, h, src_len)
+        # enc_hiddens_proj: (b, src_len, h) -> (b, h, src_len)
         enc_proj_t = enc_hiddens_proj.transpose(1, 2)
-        # Dot-product attention: (b,1,h) @ (b,h,src_len) → (b,src_len)
+        # Dot-product attention: (b,1,h) @ (b,h,src_len) -> (b,src_len)
         e_t = torch.bmm(dec_hidden_exp, enc_proj_t).squeeze(1)
 
         # 3. Apply mask to attention scores
         if enc_masks is not None:
-            e_t = e_t.masked_fill(enc_masks.bool(), float("-inf"))
+            e_t = e_t.masked_fill(enc_masks.bool(), float("-inf")) #fills padding with -inf, to essentially null them out. 
 
         # 4. Apply softmax to obtain attention distribution
         alpha_t = F.softmax(e_t, dim=1)
 
         # 5. Compute context vector
-        # alpha_t: (b, src_len) → (b,1,src_len)
-        alpha_exp = alpha_t.unsqueeze(1)
-        # (b,1,src_len) @ (b,src_len,2h) → (b,1,2h) → squeeze → (b,2h)
+        # alpha_t: (b, src_len) -> (b,1,src_len)
+        alpha_exp = alpha_t.unsqueeze(1) 
+        # (b,1,src_len) @ (b,src_len,2h) -> (b,1,2h) -> squeeze -> (b,2h)
         attention_t = torch.bmm(alpha_exp, enc_hiddens).squeeze(1)
 
         # 6. Concatenate dec_hidden with attention_t
