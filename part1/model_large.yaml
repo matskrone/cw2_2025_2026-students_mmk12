@@ -1,4 +1,4 @@
 # Large NMT model
-embed_size: 512
-hidden_size: 1024
+embed_size: 128
+hidden_size: 128
 dropout_rate: 0.2
