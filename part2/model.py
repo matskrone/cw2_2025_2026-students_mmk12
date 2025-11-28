@@ -344,17 +344,43 @@ class GPT(nn.Module):
             logits = logits[:, -1, :] / temperature
 
             if do_sample:
-                ### Your code here (~5-12 lines) ###
-                raise NotImplementedError("Implement sampling in the generate method in model.py (MSc students only)")
+                 ### Your code here (~5-12 lines) ###
+                
+                logits = logits.sort(reverse=True) #First, sort in descending order
+                
                 # 1. If top_k is not None, crop the logits to only the top k options
+                if(top_k != None):
+                  top_k_logits = logits[:top_k]
+                  logits = top_k_logits
+
 
                 # 2. If top_p is not None, crop the logits to only the top p options
+                if(top_p != None): 
+                  top_p_logits = []
+                  p=0 #For calculating cumulative probability
+                  index = 0
+                  #this terminates the loop once we have reached cum. probability target,  or if we have exceeded number of elements (if top_k has been applied this could happen)
+                  while((p<top_p) or index >= len(logits)): 
+                    p += logits[index]
+                    index += 1
+                  #once loop is finished we have collected cum. probability equal or more than top_p 
+                  #then we slice our logits based on this. I suppose it can either be inclusive or exclusive of the final probability,
+                  #meaning we can either have less than top_p always, or more, as it would be highly unlikely to land at exactly that amount 
+                  #of specificed cum. probability with a discrete number of elements.
+                  logits=logits[:top_p]
+                
+                 
 
                 # apply softmax to convert logits to (normalized) probabilities
                 # sample from the distribution using the re-normalized probabilities
+                logits_norm = F.softmax(logits)
+                sampled_input_ids = torch.multinomial(logits_norm)
 
-                # append sampled index to the running sequence and continue
-                ### End of your code ###
+
+
+                
+                # append predicted index to the running sequence and continue
+                input_ids = torch.cat((sampled_input_ids, predicted_id), dim=1)
             else:
                 # greedily take the argmax
                 predicted_id = torch.argmax(logits, dim=-1, keepdim=True)
