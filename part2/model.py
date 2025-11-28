@@ -344,43 +344,46 @@ class GPT(nn.Module):
             logits = logits[:, -1, :] / temperature
 
             if do_sample:
-                 ### Your code here (~5-12 lines) ###
+            ### Your code here (~5-12 lines) ###
                 
-                logits = logits.sort(reverse=True) #First, sort in descending order
-                
+               #This should be like greedy sampling, since we are choosing the highest probability. 
+                logits_temp = logits
+                logits_sorted, indices = logits_temp.sort(descending=True, dim=-1) #First, sort in descending order
+              
+
                 # 1. If top_k is not None, crop the logits to only the top k options
                 if(top_k != None):
-                  top_k_logits = logits[:top_k]
-                  logits = top_k_logits
-
+                  logits_sorted = logits_sorted[:, :top_k]
+                  indices = indices[:, :top_k]
+                  
 
                 # 2. If top_p is not None, crop the logits to only the top p options
                 if(top_p != None): 
-                  top_p_logits = []
                   p=0 #For calculating cumulative probability
                   index = 0
                   #this terminates the loop once we have reached cum. probability target,  or if we have exceeded number of elements (if top_k has been applied this could happen)
-                  while((p<top_p) or index >= len(logits)): 
-                    p += logits[index]
+                  while p < top_p and index < logits_sorted.shape[1]:
+                    p += logits_sorted[0, index]
                     index += 1
+
+                  logits_sorted = logits_sorted[:, :index]
+                  indices = indices[:, :index]
                   #once loop is finished we have collected cum. probability equal or more than top_p 
                   #then we slice our logits based on this. I suppose it can either be inclusive or exclusive of the final probability,
                   #meaning we can either have less than top_p always, or more, as it would be highly unlikely to land at exactly that amount 
-                  #of specificed cum. probability with a discrete number of elements.
-                  logits=logits[:top_p]
+                  #of specificed cum. probability with a discrete number of elements note, in the tutorial i saw now that inclusive is correct.
+                  
                 
-                 
-
                 # apply softmax to convert logits to (normalized) probabilities
                 # sample from the distribution using the re-normalized probabilities
-                logits_norm = F.softmax(logits)
-                sampled_input_ids = torch.multinomial(logits_norm)
+                logits_norm = F.softmax(logits_sorted, dim=-1)
+                
+                predicted_idx = torch.multinomial(logits_norm, num_samples=1, replacement=True)
 
-
-
+                predicted_id = indices[0, predicted_idx] #recover the original id of the token
                 
                 # append predicted index to the running sequence and continue
-                input_ids = torch.cat((sampled_input_ids, predicted_id), dim=1)
+                input_ids = torch.cat((input_ids, predicted_id), dim=1)
             else:
                 # greedily take the argmax
                 predicted_id = torch.argmax(logits, dim=-1, keepdim=True)
